@@ -1,6 +1,5 @@
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { nanoid } from 'nanoid';
 import {
   ButtonForm,
   ErrMsg,
@@ -8,6 +7,8 @@ import {
   InputForm,
   LabelForm,
 } from './ContactForm.styled';
+import { useDispatch } from 'react-redux';
+import { addContact } from '../../redux/contactsSlice';
 
 const formSchema = Yup.object().shape({
   name: Yup.string()
@@ -23,40 +24,45 @@ const formSchema = Yup.object().shape({
     .required('Required'),
 });
 
-export const ContactForm = ({ addContact }) => (
-  <div>
-    <Formik
-      initialValues={{
-        name: '',
-        number: '',
-        id: '',
-      }}
-      validationSchema={formSchema}
-      onSubmit={(initialValues, actions) => {
-        initialValues.id = nanoid();
-        addContact(initialValues);
-        actions.resetForm();
-      }}
-    >
-      <FormContact>
-        <LabelForm>
-          Name
-          <InputForm name="name" placeholder="Olesia" type="text" required />
-          <ErrMsg name="name" component="span" />
-        </LabelForm>
+export const ContactForm = () => {
+  const dispatch = useDispatch();
+  const handleAddContact = contact => {
+    dispatch(addContact(contact));
+  };
 
-        <LabelForm>
-          Number
-          <InputForm
-            name="number"
-            placeholder="111 11 11"
-            type="tel"
-            required
-          />
-          <ErrMsg name="number" component="span" />
-        </LabelForm>
-        <ButtonForm type="submit">Add contact</ButtonForm>
-      </FormContact>
-    </Formik>
-  </div>
-);
+  return (
+    <div>
+      <Formik
+        initialValues={{
+          name: '',
+          number: '',
+        }}
+        validationSchema={formSchema}
+        onSubmit={(initialValues, actions) => {
+          handleAddContact(initialValues);
+          actions.resetForm();
+        }}
+      >
+        <FormContact>
+          <LabelForm>
+            Name
+            <InputForm name="name" placeholder="Olesia" type="text" required />
+            <ErrMsg name="name" component="span" />
+          </LabelForm>
+
+          <LabelForm>
+            Number
+            <InputForm
+              name="number"
+              placeholder="111 11 11"
+              type="tel"
+              required
+            />
+            <ErrMsg name="number" component="span" />
+          </LabelForm>
+          <ButtonForm type="submit">Add contact</ButtonForm>
+        </FormContact>
+      </Formik>
+    </div>
+  );
+};

@@ -1,33 +1,77 @@
-import { createSlice, nanoid } from "@reduxjs/toolkit";
+import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-const contactsInitialState = [
-  { id: 0, name: "Olesia", number: "123-12-12" },
-  { id: 1, name: "Max", number: "123-12-12" }
-];
+Notify.init({
+  width: '280px',
+  position: 'right-top',
+  distance: '12px',
+  opacity: 0.9,
+  borderRadius: '5px',
+  messageMaxLength: 110,
+  fontFamily: 'Quicksand',
+  fontSize: '20px',
+  closeButton: false,
+  useIcon: false,
+  failure: {
+    background: '#251c1c',
+    textColor: '#d6d0d0',
+  },
+});
+
+const contactsInitialState = {
+  contacts: [],
+};
 
 const contactsSlice = createSlice({
-  name: "contacts",
+  name: 'contacts',
   initialState: contactsInitialState,
   reducers: {
     addContact: {
       reducer(state, action) {
-        state.push(action.payload);
+        const doubleContact = state.contacts.find(el => {
+          return (
+            el.name.trim().toLowerCase() ===
+            action.payload.name.trim().toLowerCase()
+          );
+        });
+
+        if (doubleContact) {
+          Notify.failure(`${action.payload.name} is already in contacts!`);
+          return;
+        }
+
+        state.contacts.push(action.payload);
       },
-      prepare(name, number) {
+      prepare(contact) {
+        const { name, number } = contact;
         return {
           payload: {
-            name,
             id: nanoid(),
+            name,
             number,
           },
         };
       },
     },
-    deleteContact(state, action) {
-      const index = state.findIndex(contact => contact.id === action.payload);
-      state.splice(index, 1);
-    }
 
+    deleteContact: {
+      reducer(state, action) {
+        const index = state.contacts.findIndex(
+          contact => contact.id === action.payload
+        );
+
+        state.contacts.splice(index, 1);
+      },
+    },
+
+    filterContact: {
+      reducer(state, action) {
+        const index = state.contacts.findIndex(
+          contact => contact.id === action.payload
+        );
+        state.contacts.splice(index, 1);
+      },
+    },
   },
 });
 
